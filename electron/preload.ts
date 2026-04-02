@@ -6,6 +6,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
   platform: process.platform,
   send: (channel: string, ...args: unknown[]) => ipcRenderer.send(channel, ...args),
   on: (channel: string, func: (...args: unknown[]) => void) => ipcRenderer.on(channel, (_event, ...args) => func(...args)),
+  getUsedPorts: () => ipcRenderer.invoke('get-used-ports'),
 })
 
 export {};
