@@ -10,6 +10,7 @@ interface PortInfo {
   foreignPort: number;
   state: string;
   pid: number;
+  processName: string;
 }
 
 declare global {
@@ -40,7 +41,8 @@ export default function Home() {
       port.foreignAddress.toLowerCase().includes(searchQuery.toLowerCase()) ||
       port.foreignPort.toString().includes(searchQuery) ||
       port.state.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      port.pid.toString().includes(searchQuery);
+      port.pid.toString().includes(searchQuery) ||
+      port.processName.toLowerCase().includes(searchQuery.toLowerCase());
 
     const matchesProtocol = protocolFilter === "" || port.protocol === protocolFilter;
     const matchesState = stateFilter === "" || port.state === stateFilter;
@@ -139,6 +141,7 @@ export default function Home() {
               <th className="px-4 py-3">Foreign Port</th>
               <th className="px-4 py-3">State</th>
               <th className="px-4 py-3">PID</th>
+              <th className="px-4 py-3">Process</th>
             </tr>
           </thead>
           <tbody className="text-sm text-zinc-700 dark:text-zinc-300">
@@ -154,6 +157,7 @@ export default function Home() {
                 <td className="px-4 py-2 font-mono">{port.foreignPort}</td>
                 <td className="px-4 py-2">{port.state}</td>
                 <td className="px-4 py-2 font-mono">{port.pid}</td>
+                <td className="px-4 py-2">{port.processName}</td>
               </tr>
             ))}
           </tbody>

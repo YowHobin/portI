@@ -1,5 +1,5 @@
 import { app, BrowserWindow, ipcMain } from "electron";
-import { exec } from "child_process";
+import { exec, execSync } from "child_process";
 import path from "path";
 
 const isDev = process.env.NODE_ENV !== "production";
@@ -12,6 +12,7 @@ interface PortInfo {
   foreignPort: number;
   state: string;
   pid: number;
+  processName: string;
 }
 
 function getUsedPorts(): Promise<PortInfo[]> {
@@ -58,12 +59,25 @@ function getUsedPorts(): Promise<PortInfo[]> {
               : 0,
             state,
             pid,
+            processName: getProcessName(pid),
           });
         }
       }
       resolve(ports);
     });
   });
+}
+
+function getProcessName(pid: number): string {
+  try {
+    const stdout = execSync(`tasklist /FI "PID eq ${pid}" /FO CSV /NH`, {
+      windowsHide: true,
+    });
+    const match = stdout.toString().match(/"([^"]+)"/);
+    return match ? match[1] : "Unknown";
+  } catch {
+    return "Unknown";
+  }
 }
 
 function createWindow(): void {
