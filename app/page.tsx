@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { useState } from "react";
 
 interface PortInfo {
   protocol: string;
@@ -24,10 +25,15 @@ declare global {
   }
 }
 
+async function fetchPorts(): Promise<PortInfo[]> {
+  return window.electronAPI.getUsedPorts();
+}
+
 export default function Home() {
-  const [ports, setPorts] = useState<PortInfo[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const { data: ports = [], isLoading, error } = useQuery({
+    queryKey: ["ports"],
+    queryFn: fetchPorts,
+  });
   const [searchQuery, setSearchQuery] = useState("");
   const [protocolFilter, setProtocolFilter] = useState("");
   const [stateFilter, setStateFilter] = useState("");
@@ -53,22 +59,7 @@ export default function Home() {
   const uniqueProtocols = [...new Set(ports.map((p) => p.protocol))];
   const uniqueStates = [...new Set(ports.map((p) => p.state))];
 
-  useEffect(() => {
-    async function fetchPorts() {
-      try {
-        const result = await window.electronAPI.getUsedPorts();
-        setPorts(result);
-        setLoading(false);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : "Failed to fetch ports");
-        setLoading(false);
-      }
-    }
-
-    fetchPorts();
-  }, []);
-
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
         <p className="text-lg text-zinc-600 dark:text-zinc-400">Loading ports...</p>
@@ -79,7 +70,7 @@ export default function Home() {
   if (error) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-        <p className="text-lg text-red-600">Error: {error}</p>
+        <p className="text-lg text-red-600">Error: {error.message}</p>
       </div>
     );
   }
